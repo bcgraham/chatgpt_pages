@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Connections Workspace</title>
+  <style>
+    :root {
+      --bg: #f7f4ee;
+      --panel: #fffdf9;
+      --tile: #efe9dd;
+      --tile-border: #d8d0c2;
+      --text: #2f2a24;
+      --muted: #6f675c;
+      --yellow: #f7dc6f;
+      --green: #a9dfbf;
+      --blue: #aed6f1;
+      --purple: #d2b4de;
+      --shadow: 0 4px 18px rgba(0,0,0,0.08);
+      --radius: 14px;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      color: var(--text);
+      background: linear-gradient(180deg, #fbf8f2 0%, #f3eee4 100%);
+    }
+
+    .wrap {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 20px 16px 40px;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 28px;
+      line-height: 1.1;
+    }
+
+    .sub {
+      color: var(--muted);
+      margin-bottom: 18px;
+      font-size: 15px;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid #e7dfd2;
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      margin-top: 12px;
+    }
+
+    button {
+      appearance: none;
+      border: 1px solid #cfc6b6;
+      background: #faf6ef;
+      color: var(--text);
+      border-radius: 12px;
+      padding: 10px 14px;
+      font-size: 14px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    button:hover { background: #f5efe5; }
+    button:active { transform: translateY(1px); }
+
+    textarea {
+      width: 100%;
+      min-height: 180px;
+      resize: vertical;
+      border-radius: 12px;
+      border: 1px solid #d8d0c2;
+      padding: 12px;
+      font: inherit;
+      background: #fff;
+      color: var(--text);
+    }
+
+    .small {
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 8px;
+      line-height: 1.45;
+    }
+
+    .board {
+      display: grid;
+      gap: 12px;
+      margin-top: 10px;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 42px repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      align-items: stretch;
+      min-height: 72px;
+    }
+
+    .lockbox {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 14px;
+      border: 1px solid #ddd4c7;
+      background: #fff;
+      min-height: 72px;
+      user-select: none;
+    }
+
+    .lockbox input {
+      width: 20px;
+      height: 20px;
+      cursor: pointer;
+    }
+
+    .slot {
+      min-height: 72px;
+      border-radius: 14px;
+      border: 2px dashed #ddd4c7;
+      background: rgba(255,255,255,0.55);
+      display: flex;
+      align-items: stretch;
+      justify-content: stretch;
+      transition: background 0.15s ease, border-color 0.15s ease;
+    }
+
+    .slot.drag-over {
+      background: #f6f1e8;
+      border-color: #b8ae9d;
+    }
+
+    .tile {
+      width: 100%;
+      min-height: 72px;
+      border-radius: 12px;
+      border: 1px solid var(--tile-border);
+      background: var(--tile);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 10px 12px;
+      font-weight: 700;
+      font-size: 15px;
+      line-height: 1.15;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      cursor: grab;
+      user-select: none;
+      box-shadow: 0 1px 0 rgba(0,0,0,0.04);
+      overflow-wrap: anywhere;
+    }
+
+    .tile.dragging {
+      opacity: 0.55;
+      cursor: grabbing;
+    }
+
+    .row.locked-yellow .tile, .row.locked-yellow .slot.filled { background: var(--yellow); border-color: rgba(0,0,0,0.1); }
+    .row.locked-green .tile, .row.locked-green .slot.filled { background: var(--green); border-color: rgba(0,0,0,0.1); }
+    .row.locked-blue .tile, .row.locked-blue .slot.filled { background: var(--blue); border-color: rgba(0,0,0,0.1); }
+    .row.locked-purple .tile, .row.locked-purple .slot.filled { background: var(--purple); border-color: rgba(0,0,0,0.1); }
+
+    .status {
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .footer-note {
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 10px;
+      line-height: 1.45;
+    }
+
+    @media (max-width: 700px) {
+      .row {
+        grid-template-columns: 36px repeat(4, minmax(0, 1fr));
+        gap: 8px;
+      }
+      .tile, .slot, .lockbox {
+        min-height: 64px;
+      }
+      .tile {
+        font-size: 13px;
+        padding: 8px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>connections workspace</h1>
+    <div class="sub">drag tiles anywhere. lock a row when you want to treat it as a candidate group.</div>
+
+    <div class="panel">
+      <label for="bulkInput"><strong>paste tile text</strong></label>
+      <textarea id="bulkInput" placeholder="best format: one tile per line&#10;&#10;example:&#10;MONARCH&#10;BUTTERFLY&#10;TURN SIGNAL&#10;TICKET COUNTER&#10;..."></textarea>
+      <div class="controls">
+        <button id="loadBtn">load tiles</button>
+        <button id="shuffleBtn">shuffle unlocked</button>
+        <button id="resetBtn">reset locks</button>
+        <button id="clearBtn">clear board</button>
+      </div>
+      <div class="small">
+        best input format is one tile per line. state saves automatically in this browser. lock colors go top-to-bottom: yellow, green, blue, purple.
+      </div>
+    </div>
+
+    <div class="panel">
+      <div id="board" class="board" aria-label="connections board"></div>
+      <div id="status" class="status"></div>
+      <div class="footer-note">
+        not included yet: screenshot OCR. for now the fastest path is usually iphone text detection → copy text → paste here.
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const STORAGE_KEY = "connections_workspace_v1";
+    const ROW_COLORS = ["yellow", "green", "blue", "purple"];
+    let state = makeEmptyState();
+
+    function makeEmptyState() {
+      return {
+        slots: Array.from({ length: 16 }, () => null),
+        locks: [false, false, false, false],
+        inputText: ""
+      };
+    }
+
+    function normalizeItems(raw) {
+      const trimmed = raw.trim();
+      if (!trimmed) return [];
+
+      let items = trimmed
+        .split(/\n+/)
+        .map(s => s.trim())
+        .filter(Boolean);
+
+      if (items.length <= 1) {
+        items = trimmed
+          .split(/\t|,|;|\u2022/g)
+          .map(s => s.trim())
+          .filter(Boolean);
+      }
+
+      return items.slice(0, 16);
+    }
+
+    function saveState() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return;
+        const parsed = JSON.parse(raw);
+        if (!parsed || !Array.isArray(parsed.slots) || !Array.isArray(parsed.locks)) return;
+        state = {
+          slots: Array.from({ length: 16 }, (_, i) => parsed.slots[i] ?? null),
+          locks: Array.from({ length: 4 }, (_, i) => !!parsed.locks[i]),
+          inputText: typeof parsed.inputText === "string" ? parsed.inputText : ""
+        };
+      } catch (e) {
+        state = makeEmptyState();
+      }
+    }
+
+    function colorClassForRow(row) {
+      if (!state.locks[row]) return "";
+      return "locked-" + ROW_COLORS[row];
+    }
+
+    function setStatus(msg) {
+      document.getElementById("status").textContent = msg;
+    }
+
+    function rowLocked(rowIndex) {
+      return !!state.locks[rowIndex];
+    }
+
+    function slotLocked(slotIndex) {
+      const row = Math.floor(slotIndex / 4);
+      return rowLocked(row);
+    }
+
+    function render() {
+      const board = document.getElementById("board");
+      board.innerHTML = "";
+
+      for (let row = 0; row < 4; row++) {
+        const rowEl = document.createElement("div");
+        rowEl.className = "row " + colorClassForRow(row);
+
+        const lockWrap = document.createElement("label");
+        lockWrap.className = "lockbox";
+        lockWrap.title = "lock row";
+        const check = document.createElement("input");
+        check.type = "checkbox";
+        check.checked = state.locks[row];
+        check.addEventListener("change", () => {
+          state.locks[row] = check.checked;
+          saveState();
+          render();
+        });
+        lockWrap.appendChild(check);
+        rowEl.appendChild(lockWrap);
+
+        for (let col = 0; col < 4; col++) {
+          const slotIndex = row * 4 + col;
+          const slotEl = document.createElement("div");
+          slotEl.className = "slot" + (state.slots[slotIndex] ? " filled" : "");
+          slotEl.dataset.slotIndex = slotIndex;
+
+          slotEl.addEventListener("dragover", (e) => {
+            e.preventDefault();
+            const dragged = Number(e.dataTransfer.getData("text/plain"));
+            if (Number.isNaN(dragged)) return;
+            if (slotLocked(slotIndex) && dragged !== slotIndex) return;
+            if (slotLocked(dragged) && dragged !== slotIndex) return;
+            slotEl.classList.add("drag-over");
+          });
+
+          slotEl.addEventListener("dragleave", () => {
+            slotEl.classList.remove("drag-over");
+          });
+
+          slotEl.addEventListener("drop", (e) => {
+            e.preventDefault();
+            slotEl.classList.remove("drag-over");
+            const from = Number(e.dataTransfer.getData("text/plain"));
+            if (Number.isNaN(from)) return;
+            moveTile(from, slotIndex);
+          });
+
+          const value = state.slots[slotIndex];
+          if (value) {
+            const tile = document.createElement("div");
+            tile.className = "tile";
+            tile.draggable = !slotLocked(slotIndex);
+            tile.textContent = value;
+
+            tile.addEventListener("dragstart", (e) => {
+              tile.classList.add("dragging");
+              e.dataTransfer.setData("text/plain", String(slotIndex));
+              e.dataTransfer.effectAllowed = "move";
+            });
+
+            tile.addEventListener("dragend", () => {
+              tile.classList.remove("dragging");
+              document.querySelectorAll(".slot.drag-over").forEach(el => el.classList.remove("drag-over"));
+            });
+
+            slotEl.appendChild(tile);
+          }
+
+          rowEl.appendChild(slotEl);
+        }
+
+        board.appendChild(rowEl);
+      }
+
+      document.getElementById("bulkInput").value = state.inputText || "";
+      const count = state.slots.filter(Boolean).length;
+      const lockedCount = state.locks.filter(Boolean).length;
+      setStatus(`${count}/16 tiles loaded · ${lockedCount} row${lockedCount === 1 ? "" : "s"} locked`);
+    }
+
+    function moveTile(from, to) {
+      if (from === to) return;
+      if (slotLocked(from) || slotLocked(to)) return;
+
+      const temp = state.slots[to];
+      state.slots[to] = state.slots[from];
+      state.slots[from] = temp;
+      saveState();
+      render();
+    }
+
+    function loadTilesFromInput() {
+      const text = document.getElementById("bulkInput").value;
+      const items = normalizeItems(text);
+
+      state.inputText = text;
+
+      if (items.length === 0) {
+        setStatus("no tiles found");
+        saveState();
+        render();
+        return;
+      }
+
+      state.slots = Array.from({ length: 16 }, (_, i) => items[i] ?? null);
+      state.locks = [false, false, false, false];
+      saveState();
+      render();
+
+      if (items.length < 16) {
+        setStatus(`loaded ${items.length} tile${items.length === 1 ? "" : "s"} · need 16 for a full board`);
+      } else {
+        setStatus("loaded 16 tiles");
+      }
+    }
+
+    function shuffleUnlocked() {
+      const unlockedIndices = [];
+      const unlockedValues = [];
+
+      state.slots.forEach((value, idx) => {
+        if (!slotLocked(idx) && value) {
+          unlockedIndices.push(idx);
+          unlockedValues.push(value);
+        }
+      });
+
+      for (let i = unlockedValues.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [unlockedValues[i], unlockedValues[j]] = [unlockedValues[j], unlockedValues[i]];
+      }
+
+      unlockedIndices.forEach((idx, i) => {
+        state.slots[idx] = unlockedValues[i];
+      });
+
+      saveState();
+      render();
+    }
+
+    function resetLocks() {
+      state.locks = [false, false, false, false];
+      saveState();
+      render();
+    }
+
+    function clearBoard() {
+      state = makeEmptyState();
+      saveState();
+      render();
+    }
+
+    document.getElementById("loadBtn").addEventListener("click", loadTilesFromInput);
+    document.getElementById("shuffleBtn").addEventListener("click", shuffleUnlocked);
+    document.getElementById("resetBtn").addEventListener("click", resetLocks);
+    document.getElementById("clearBtn").addEventListener("click", clearBoard);
+
+    document.getElementById("bulkInput").addEventListener("input", (e) => {
+      state.inputText = e.target.value;
+      saveState();
+    });
+
+    loadState();
+    render();
+  </script>
+</body>
+</html>
