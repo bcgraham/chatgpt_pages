@@ -6,53 +6,63 @@
   <title>Connections Workspace</title>
   <style>
     :root {
-      --bg: #f7f4ee;
-      --panel: #fffdf9;
-      --tile: #efe9dd;
-      --tile-border: #d8d0c2;
-      --text: #2f2a24;
-      --muted: #6f675c;
-      --yellow: #f7dc6f;
-      --green: #a9dfbf;
-      --blue: #aed6f1;
-      --purple: #d2b4de;
-      --shadow: 0 4px 18px rgba(0,0,0,0.08);
-      --radius: 14px;
+      --bg: #121212;
+      --panel: #121212;
+      --tile: #f2f0e6;
+      --tile-border: transparent;
+      --text: #111111;
+      --page-text: #f5f3ec;
+      --muted: #b9b4aa;
+      --yellow: #f2dc68;
+      --green: #a6c766;
+      --blue: #b4c7ee;
+      --purple: #c39ad9;
+      --slot-bg: transparent;
+      --control-bg: #1a1a1a;
+      --control-border: #8f8a80;
+      --control-text: #f5f3ec;
     }
 
     * { box-sizing: border-box; }
+
     body {
       margin: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      color: var(--text);
-      background: linear-gradient(180deg, #fbf8f2 0%, #f3eee4 100%);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--page-text);
     }
 
     .wrap {
-      max-width: 1100px;
+      max-width: 760px;
       margin: 0 auto;
-      padding: 20px 16px 40px;
+      padding: 20px 14px 36px;
     }
 
     h1 {
       margin: 0 0 8px;
       font-size: 28px;
       line-height: 1.1;
+      color: var(--page-text);
+      text-align: center;
     }
 
     .sub {
       color: var(--muted);
-      margin-bottom: 18px;
-      font-size: 15px;
+      margin-bottom: 16px;
+      font-size: 14px;
+      text-align: center;
     }
 
     .panel {
       background: var(--panel);
-      border: 1px solid #e7dfd2;
+      border: 1px solid #2a2a2a;
       border-radius: 18px;
-      box-shadow: var(--shadow);
-      padding: 16px;
+      padding: 14px;
       margin-bottom: 16px;
+    }
+
+    label {
+      color: var(--page-text);
     }
 
     .controls {
@@ -65,141 +75,195 @@
 
     button {
       appearance: none;
-      border: 1px solid #cfc6b6;
-      background: #faf6ef;
-      color: var(--text);
-      border-radius: 12px;
-      padding: 10px 14px;
+      border: 1.5px solid var(--control-border);
+      background: var(--control-bg);
+      color: var(--control-text);
+      border-radius: 999px;
+      padding: 11px 18px;
       font-size: 14px;
       cursor: pointer;
-      font-weight: 600;
+      font-weight: 700;
     }
 
-    button:hover { background: #f5efe5; }
+    button:hover { filter: brightness(1.06); }
     button:active { transform: translateY(1px); }
 
     textarea {
       width: 100%;
       min-height: 180px;
       resize: vertical;
-      border-radius: 12px;
-      border: 1px solid #d8d0c2;
+      border-radius: 16px;
+      border: 1px solid #5f5a52;
       padding: 12px;
       font: inherit;
-      background: #fff;
-      color: var(--text);
+      background: #181818;
+      color: var(--page-text);
     }
 
-    .small {
-      font-size: 13px;
+    .small,
+    .footer-note,
+    .status {
       color: var(--muted);
-      margin-top: 8px;
+      font-size: 13px;
       line-height: 1.45;
     }
 
+    .small { margin-top: 8px; }
+    .status { margin-top: 12px; font-size: 14px; }
+    .footer-note { margin-top: 10px; }
+
     .board {
       display: grid;
-      gap: 12px;
-      margin-top: 10px;
+      gap: 10px;
+      margin-top: 4px;
     }
 
     .row {
       display: grid;
-      grid-template-columns: 42px repeat(4, minmax(0, 1fr));
-      gap: 10px;
+      grid-template-columns: 40px repeat(4, minmax(0, 1fr));
+      gap: 8px;
       align-items: stretch;
-      min-height: 72px;
+      min-height: 82px;
     }
 
     .lockbox {
       display: flex;
       align-items: center;
       justify-content: center;
-      border-radius: 14px;
-      border: 1px solid #ddd4c7;
-      background: #fff;
-      min-height: 72px;
+      border-radius: 18px;
+      border: 1.5px solid #69645b;
+      background: #171717;
+      min-height: 82px;
       user-select: none;
     }
 
     .lockbox input {
-      width: 20px;
-      height: 20px;
+      width: 21px;
+      height: 21px;
       cursor: pointer;
     }
 
     .slot {
-      min-height: 72px;
-      border-radius: 14px;
-      border: 2px dashed #ddd4c7;
-      background: rgba(255,255,255,0.55);
+      min-height: 82px;
+      border-radius: 12px;
+      border: 0;
+      background: var(--slot-bg);
       display: flex;
       align-items: stretch;
       justify-content: stretch;
-      transition: background 0.15s ease, border-color 0.15s ease;
+      transition: transform 0.12s ease, opacity 0.12s ease;
+      position: relative;
     }
 
     .slot.drag-over {
-      background: #f6f1e8;
-      border-color: #b8ae9d;
+      transform: scale(0.985);
     }
 
     .tile {
       width: 100%;
-      min-height: 72px;
+      min-height: 82px;
       border-radius: 12px;
-      border: 1px solid var(--tile-border);
+      border: 0;
       background: var(--tile);
+      color: var(--text);
       display: flex;
       align-items: center;
       justify-content: center;
       text-align: center;
-      padding: 10px 12px;
-      font-weight: 700;
-      font-size: 15px;
-      line-height: 1.15;
-      letter-spacing: 0.02em;
+      padding: 7px 8px;
+      font-weight: 800;
+      font-size: clamp(11px, 2.15vw, 18px);
+      line-height: 1.02;
+      letter-spacing: 0.01em;
       text-transform: uppercase;
       cursor: grab;
       user-select: none;
-      box-shadow: 0 1px 0 rgba(0,0,0,0.04);
-      overflow-wrap: anywhere;
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
+      box-shadow: none;
+      overflow-wrap: break-word;
+      word-break: normal;
+      white-space: normal;
     }
 
     .tile.dragging {
-      opacity: 0.55;
+      opacity: 0.6;
       cursor: grabbing;
     }
 
-    .row.locked-yellow .tile, .row.locked-yellow .slot.filled { background: var(--yellow); border-color: rgba(0,0,0,0.1); }
-    .row.locked-green .tile, .row.locked-green .slot.filled { background: var(--green); border-color: rgba(0,0,0,0.1); }
-    .row.locked-blue .tile, .row.locked-blue .slot.filled { background: var(--blue); border-color: rgba(0,0,0,0.1); }
-    .row.locked-purple .tile, .row.locked-purple .slot.filled { background: var(--purple); border-color: rgba(0,0,0,0.1); }
-
-    .status {
-      margin-top: 10px;
-      color: var(--muted);
-      font-size: 14px;
+    .tile.long {
+      font-size: clamp(10px, 1.75vw, 15px);
+      line-height: 0.98;
+      padding: 6px 6px;
     }
 
-    .footer-note {
-      font-size: 13px;
-      color: var(--muted);
-      margin-top: 10px;
-      line-height: 1.45;
+    .tile.very-long {
+      font-size: clamp(9px, 1.48vw, 13px);
+      line-height: 0.95;
+      letter-spacing: 0;
+      padding: 5px 5px;
     }
+
+    .row.locked-yellow .tile,
+    .row.locked-yellow .slot.filled { background: var(--yellow); }
+
+    .row.locked-green .tile,
+    .row.locked-green .slot.filled { background: var(--green); }
+
+    .row.locked-blue .tile,
+    .row.locked-blue .slot.filled { background: var(--blue); }
+
+    .row.locked-purple .tile,
+    .row.locked-purple .slot.filled { background: var(--purple); }
 
     @media (max-width: 700px) {
+      .wrap {
+        padding: 12px 10px 28px;
+      }
+
+      h1 {
+        font-size: 24px;
+      }
+
+      .panel {
+        padding: 12px;
+      }
+
       .row {
-        grid-template-columns: 36px repeat(4, minmax(0, 1fr));
+        grid-template-columns: 34px repeat(4, minmax(0, 1fr));
+        gap: 6px;
+        min-height: 68px;
+      }
+
+      .lockbox {
+        min-height: 68px;
+        border-radius: 16px;
+      }
+
+      .slot,
+      .tile {
+        min-height: 68px;
+      }
+
+      .tile {
+        padding: 6px 5px;
+        font-size: clamp(11px, 3.6vw, 16px);
+      }
+
+      .tile.long {
+        font-size: clamp(10px, 3vw, 13px);
+      }
+
+      .tile.very-long {
+        font-size: clamp(9px, 2.4vw, 11px);
+      }
+
+      .controls {
         gap: 8px;
       }
-      .tile, .slot, .lockbox {
-        min-height: 64px;
-      }
-      .tile {
-        font-size: 13px;
-        padding: 8px;
+
+      button {
+        padding: 10px 16px;
       }
     }
   </style>
@@ -207,11 +271,11 @@
 <body>
   <div class="wrap">
     <h1>connections workspace</h1>
-    <div class="sub">drag tiles anywhere. lock a row when you want to treat it as a candidate group.</div>
+    <div class="sub">press and hold a tile to drag it. lock a row when you want to treat it as a candidate group.</div>
 
     <div class="panel">
       <label for="bulkInput"><strong>paste tile text</strong></label>
-      <textarea id="bulkInput" placeholder="best format: one tile per line&#10;&#10;example:&#10;MONARCH&#10;BUTTERFLY&#10;TURN SIGNAL&#10;TICKET COUNTER&#10;..."></textarea>
+      <textarea id="bulkInput" placeholder="best format: one tile per line&#10;&#10;example:&#10;MUSTARD&#10;WING&#10;WEDNESDAY&#10;WORCESTERSHIRE&#10;..."></textarea>
       <div class="controls">
         <button id="loadBtn">load tiles</button>
         <button id="shuffleBtn">shuffle unlocked</button>
@@ -219,7 +283,7 @@
         <button id="clearBtn">clear board</button>
       </div>
       <div class="small">
-        best input format is one tile per line. state saves automatically in this browser. lock colors go top-to-bottom: yellow, green, blue, purple.
+        dark mode is on by default. best input format is one tile per line. state saves automatically in this browser. lock colors go top-to-bottom: yellow, green, blue, purple.
       </div>
     </div>
 
@@ -227,13 +291,14 @@
       <div id="board" class="board" aria-label="connections board"></div>
       <div id="status" class="status"></div>
       <div class="footer-note">
-        not included yet: screenshot OCR. for now the fastest path is usually iphone text detection → copy text → paste here.
+        not included yet: screenshot OCR. fastest path is still iphone text detection → copy text → paste here.
       </div>
     </div>
   </div>
 
   <script>
-    const STORAGE_KEY = "connections_workspace_v1";
+    const STORAGE_KEY = "connections_workspace_v3";
+    const LEGACY_KEYS = ["connections_workspace_v3", "connections_workspace_v2", "connections_workspace_v1"];
     const ROW_COLORS = ["yellow", "green", "blue", "purple"];
     let state = makeEmptyState();
 
@@ -270,7 +335,11 @@
 
     function loadState() {
       try {
-        const raw = localStorage.getItem(STORAGE_KEY);
+        let raw = null;
+        for (const key of LEGACY_KEYS) {
+          raw = localStorage.getItem(key);
+          if (raw) break;
+        }
         if (!raw) return;
         const parsed = JSON.parse(raw);
         if (!parsed || !Array.isArray(parsed.slots) || !Array.isArray(parsed.locks)) return;
@@ -285,8 +354,7 @@
     }
 
     function colorClassForRow(row) {
-      if (!state.locks[row]) return "";
-      return "locked-" + ROW_COLORS[row];
+      return state.locks[row] ? `locked-${ROW_COLORS[row]}` : "";
     }
 
     function setStatus(msg) {
@@ -298,8 +366,14 @@
     }
 
     function slotLocked(slotIndex) {
-      const row = Math.floor(slotIndex / 4);
-      return rowLocked(row);
+      return rowLocked(Math.floor(slotIndex / 4));
+    }
+
+    function tileClassFor(value) {
+      const len = value.length;
+      if (len >= 16) return "tile very-long";
+      if (len >= 11) return "tile long";
+      return "tile";
     }
 
     function render() {
@@ -308,7 +382,7 @@
 
       for (let row = 0; row < 4; row++) {
         const rowEl = document.createElement("div");
-        rowEl.className = "row " + colorClassForRow(row);
+        rowEl.className = `row ${colorClassForRow(row)}`;
 
         const lockWrap = document.createElement("label");
         lockWrap.className = "lockbox";
@@ -354,7 +428,7 @@
           const value = state.slots[slotIndex];
           if (value) {
             const tile = document.createElement("div");
-            tile.className = "tile";
+            tile.className = tileClassFor(value);
             tile.draggable = !slotLocked(slotIndex);
             tile.textContent = value;
 
